@@ -1,16 +1,12 @@
-import React from 'react'
-import './assets/css/style.css'
-import Header from './componets/Header'
-import Main from './componets/Main'
-import Footer from './componets/Footer'
+
+import { BrowserRouter } from 'react-router-dom'
+import Approuter from './componets/Approuter'
 
 const App = () => {
   return (
-    <div>
-      <Header/>
-      <Main/>
-      <Footer/>
-    </div>
+    <BrowserRouter>
+      <Approuter />
+    </BrowserRouter>
   )
 }
 

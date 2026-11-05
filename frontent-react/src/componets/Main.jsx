@@ -28,10 +28,6 @@ const Main = () => {
           more informed investing.
         </p>
 
-        <button className="bg-emerald-500 hover:bg-emerald-600 px-8 py-3 rounded-lg font-semibold text-white transition duration-300">
-          Login
-        </button>
-
         <p className="text-slate-500 text-sm mt-6">
           Understand the market. Make informed decisions.
         </p>
