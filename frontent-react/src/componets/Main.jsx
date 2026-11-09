@@ -1,6 +1,10 @@
-import React from 'react'
+import { useContext } from 'react'
+import { Link } from 'react-router-dom'
+import { AuthContext } from './Authprovider'
 
 const Main = () => {
+  const { isLoggedIn } = useContext(AuthContext)
+
   return (
     <main className="min-h-[80vh] bg-slate-950 text-white flex items-center justify-center px-6 py-16">
       <div className="max-w-3xl text-center">
@@ -31,6 +35,13 @@ const Main = () => {
         <p className="text-slate-500 text-sm mt-6">
           Understand the market. Make informed decisions.
         </p>
+
+        <Link
+          to={isLoggedIn ? '/explore' : '/login'}
+          className="bg-emerald-500 px-5 py-2 rounded inline-block mt-6"
+        >
+          Explore Now
+        </Link>
 
       </div>
     </main>

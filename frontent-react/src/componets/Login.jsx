@@ -23,7 +23,7 @@ const Login = () => {
       localStorage.setItem('accessToken',response.data.access)
       localStorage.setItem('refreshToken',response.data.refresh)
       setLoggedin(true)
-      navigate('/dashboard')
+      navigate('/explore')
 
     }catch(error){
       seterror("Invalid Credentials")
@@ -68,10 +68,6 @@ const Login = () => {
     'Login'
   )}
 </button >
-
-
-    
-
         <p className="mt-4 text-center text-sm text-gray-500">
           Don't have an account?{' '}
           <a href="/register" className="text-indigo-600 hover:underline">

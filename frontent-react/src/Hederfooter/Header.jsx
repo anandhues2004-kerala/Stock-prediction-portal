@@ -9,7 +9,7 @@ const handlelogout=()=>{
   localStorage.removeItem('accessToken')
   localStorage.removeItem('refreshToken')
   setLoggedin(false)
-  navigate('/')
+  navigate('/login')
 
 }
   return (
@@ -19,11 +19,24 @@ const handlelogout=()=>{
         {/* Left side: Logo */}
         <h1 className="text-2xl font-bold">
         <Link className="text-emerald-400" to="/">Stock Predict</Link>
+        
         </h1>
 
         <div>
           {isLoggedIn ?(
-           <Link className="text-slate-300 hover:text-white transition" onClick={handlelogout}>Logout</Link>
+            <div className="flex items-center gap-6 px-10">
+  <Link className="text-slate-300 hover:text-white transition" to="/dashboard">
+    Dashboard
+  </Link>
+  <button
+    className="text-slate-300 hover:text-white transition"
+    onClick={handlelogout}
+  >
+    Logout
+  </button>
+</div>
+          
+          
           ):(
              <div className="flex items-center gap-4">
             <Link
