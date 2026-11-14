@@ -1,3 +1,117 @@
 from django.shortcuts import render
+from rest_framework.views import APIView
+from .serializer import StockpredictionSerializer
+from rest_framework.response import Response
+from rest_framework import status
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import yfinance as yf
+from datetime import datetime
+import os
+from django.conf import settings
+from.utilis import save_plot
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import load_model
 
 # Create your views here.
+class StockpredictionAPIView(APIView):
+    def post(self,request):
+        serializer=StockpredictionSerializer(data=request.data)
+        if serializer.is_valid():
+            ticker=serializer.validated_data['ticker']
+
+            now=datetime.now()
+            start=datetime(now.year-10,now.month,now.day)
+            end=now
+            df=yf.download(ticker,start,end)
+            
+            if df.empty:
+                return Response({"error":"No data found given ticker","status":status.HTTP_404_NOT_FOUND})
+            df=df.reset_index()
+            #basic plot
+            plt.switch_backend('AGG')
+            plt.figure(figsize=(12,5))
+            plt.plot(df.Close,label="Closing price")
+            plt.title(f"Closing price {ticker}")
+            plt.xlabel('Days')
+            plt.ylabel('closeprice')
+            plt.legend()
+            #save plot
+            img_plot_path=f'{ticker}plot.png'
+           
+            plot_img=save_plot(img_plot_path)
+            #100 days moving avg
+
+            ma100=df.Close.rolling(100).mean()
+            plt.switch_backend('AGG')
+            plt.figure(figsize=(12,5))
+            plt.plot(df.Close,label="Closing price")
+            plt.plot(ma100,'r',label="100 DMA")
+            plt.title(f"100 DAYS MOVING AVG {ticker}")
+            plt.xlabel('Days')
+            plt.ylabel('closeprice')
+            plt.legend()
+            img_plot_path=f'{ticker}_100_dma.png'
+                       
+            plot_100_dma=save_plot(img_plot_path)
+
+
+            # 200 days moving avg
+            ma200=df.Close.rolling(200).mean()
+            plt.switch_backend('AGG')
+            plt.figure(figsize=(12,5))
+            plt.plot(df.Close,label="Closing price")
+            plt.plot(ma100,'r',label="100 DMA")
+            plt.plot(ma200,'g',label="200 DMA")
+            plt.title(f"200 DAYS MOVING AVG {ticker}")
+            plt.xlabel('Days')
+            plt.ylabel('closeprice')
+            plt.legend()
+            img_plot_path=f'{ticker}_200_dma.png'
+                                   
+            plot_200_dma=save_plot(img_plot_path)
+
+            #spliting data training and testing 
+            data_training=pd.DataFrame(df.Close[0:int(len(df)*0.7)])
+            data_testing=pd.DataFrame(df.Close[int(len(df)*0.7): int(len(df))])
+
+            
+            scaler=MinMaxScaler(feature_range=(0,1))
+            # load ml model
+            model=load_model('stock__prediction__model.keras')
+            #prepare testdata
+            past_100_days=data_training.tail(100)
+            final_df=pd.concat([past_100_days,data_testing],ignore_index=True)
+            input_data=scaler.fit_transform(final_df)
+
+            x_test=[]
+            y_test=[]
+            for i in range(100,input_data.shape[0]):
+                x_test.append(input_data[i-100: i])
+                y_test.append(input_data[i,0])
+            x_test,y_test=np.array(x_test),np.array(y_test)
+
+            #Make predictions
+            y_predicted=model.predict(x_test)
+            # Revert scaled price to org price
+            y_predicted=scaler.inverse_transform(y_predicted.reshape(-1,1)).flatten()
+            y_test=scaler.inverse_transform(y_test.reshape(-1,1)).flatten()   
+
+            #plot the final prediction
+            plt.switch_backend('AGG')
+            plt.figure(figsize=(12,5))
+            plt.plot(y_test,'b', label="Orginal price")
+            plt.plot(y_predicted,'r',label="Predicted price")
+            plt.title(f"FINAL PREDICTION {ticker}")
+            plt.xlabel('Days')
+            plt.ylabel('Price')
+            plt.legend()
+            img_plot_path=f'{ticker}final.png'                         
+            plot_prediction=save_plot(img_plot_path)
+            
+
+
+            return Response({'status':'success','plot_img':plot_img,'plot_100_dma':plot_100_dma,'plot_200_dma':plot_200_dma,
+                             'plot_prediction':plot_prediction})
+        

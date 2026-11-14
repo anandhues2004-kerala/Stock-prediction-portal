@@ -20,11 +20,11 @@ const Approuter = () => {
           <Route path='login' element={<Publicroutes><Login/></Publicroutes>}/>
           <Route
             path='explore'
-            element={<PrivateRoutes><Dashboard /></PrivateRoutes>}
+            element={<Publicroutes><Dashboard/></Publicroutes>}
           />
           <Route
             path='dashboard'
-            element={<PrivateRoutes><OrgDash /></PrivateRoutes>}
+            element={<PrivateRoutes><OrgDash/></PrivateRoutes>}
           />
         </Route>
       </Routes>
